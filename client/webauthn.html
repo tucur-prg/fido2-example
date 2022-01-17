@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+     content="width=320,
+        height=480,
+        initial-scale=1.0,
+        minimum-scale=1.0,
+        maximum-scale=2.0,
+        user-scalable=yes" />
+
+  <title>WebAuthn</title>
+  <script src="https://unpkg.com/cbor-js-unofficial@0.1.0-a4/cbor.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+  <button onClick="create();">Create Security Key</button>
+  <button onClick="get();">Get Security Key</button>
+  <hr>
+  <span id="event"></span><br>
+  <hr>
+  <span id="res-id"></span><br>
+  <span id="res-type"></span><br>
+  <span id="res-cbor"></span><br>
+  <span id="res-json"></span><br>
+  <hr>
+  <span id="get-id"></span><br>
+  <span id="get-type"></span><br>
+  <span id="get-cbor"></span><br>
+  <span id="get-json"></span><br>
+  <span id="get-uh"></span><br>
+  <hr>
+  <span id="error"></span><br>
+  <hr>
+  <span id="support"></span><br>
+
+<script>
+function toBuffer16(str) {
+  return new Uint16Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }));
+}
+function toBuffer8(str) {
+  return new Uint8Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }));
+}
+
+function uint16ToString(buf) {
+  return String.fromCharCode.apply("", new Uint16Array(buf));
+}
+function uint8ToString(buf) {
+  return String.fromCharCode.apply("", new Uint8Array(buf));
+}
+
+async function sha256(str) {
+    const buff = new Uint8Array([].map.call(str, (c) => c.charCodeAt(0))).buffer;
+    const digest = await crypto.subtle.digest('SHA-256', buff);
+    return new Uint8Array(digest);
+}
+
+function h(v, spacer='') {
+  return [].map.call(v, x => ("00" + x.toString(16)).slice(-2)).join(spacer)
+}
+
+function b64encode(buf) {
+  str = String.fromCharCode.apply(null, new Uint8Array(buf))
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+function b64decode(val) {
+  val = val
+    .replace(/\-/g, '+')
+    .replace(/\_/g, '/')
+    .padEnd(val.length + val.length % 4, '=')
+  return atob(val)
+}
+
+let registId;
+
+document.getElementById('support').innerText = ('credentials' in navigator) ? 'Support' : 'UnSupport';
+
+function setEvent(str) {
+  document.getElementById('event').innerText = "Event: " + str;
+}
+
+function parseAttestationObject(attestationObject) {
+  let attestation = CBOR.decode(attestationObject);
+
+  const rpIdHash = attestation.authData.slice(0, 32);
+  const flags = attestation.authData[32];
+  const signCount = (attestation.authData[33] << 24) | (attestation.authData[34] << 16) | (attestation.authData[35] << 8) | attestation.authData[36];
+  const aaguid = attestation.authData.slice(37, 53);
+  const credentialIdLength = (attestation.authData[53] << 8) + attestation.authData[54];
+  const credentialId = attestation.authData.slice(55, 55 + credentialIdLength);
+  const credentialPublicKey = attestation.authData.slice(55 + credentialIdLength);
+
+  console.log(h(rpIdHash));
+
+  console.log(flags);
+  console.log(Boolean(flags & 0x01));
+  console.log(Boolean(flags & 0x04));
+
+  console.log(signCount);
+
+  let t = h(aaguid);
+  console.log(t.slice(0, 8) + '-' + t.slice(8, 12) + '-' + t.slice(12, 16) + '-' + t.slice(16));
+
+  console.log(credentialId);
+  console.log(credentialPublicKey);
+
+  const publicKeyCbor = CBOR.decode(credentialPublicKey.buffer);
+  console.log(publicKeyCbor);
+
+  if (publicKeyCbor[3] == -7) {
+    publicKeyJwk = {
+      kty: 'EC',
+      crv: 'P-256',
+      x: publicKeyCbor[-2],
+      y: publicKeyCbor[-3],
+    }
+  }
+
+//  sha256('localhost').then(hash => {
+//      console.log(h(hash));
+//      console.log(h(rpIdHash));
+//  });
+
+  return attestation;
+}
+
+function parseAuthenticatorData(authenticatorData) {
+//  let authenticator = CBOR.decode(authenticatorData);
+  let authenticator = new Uint8Array(authenticatorData);
+
+  const rpIdHash = authenticator.slice(0, 32);
+  const flags = authenticator[32];
+  const signCount = (authenticator[33] << 24) | (authenticator[34] << 16) | (authenticator[35] << 8) | authenticator[36];
+
+  console.log(h(rpIdHash));
+
+  console.log(flags);
+  console.log(Boolean(flags & 0x01));
+  console.log(Boolean(flags & 0x04));
+
+  console.log(signCount);
+
+  return authenticator;
+}
+
+// Button Event
+function create() {
+  setEvent('create start.');
+  navigator.credentials.create({
+    publicKey: {
+      rp: {
+        id: 'localhost',
+        name: 'WebAuthn Test',
+      },
+      user: {
+        id: toBuffer8('hogehoge'),
+        name: 'webauthn@example.com',
+        displayName: 'Hoge',
+      },
+      attestation: 'direct',
+      pubKeyCredParams: [
+        {
+          type: 'public-key',
+          alg: -7,
+        },
+        {
+          type: 'public-key',
+          alg: -257
+        },
+      ],
+      challenge: toBuffer16('my_challenge'),
+      authenticatorSelection: {
+//        userVerification: 'required',
+        authenticatorAttachment: 'platform',
+//        requireResidentKey: true,
+      },
+    },
+  }).then(success => {
+    // success: PublicKeyCredential
+    registId = success.rawId;
+
+//    console.log(h(new Uint8Array(success.response.attestationObject), ' '));
+
+    document.getElementById('res-id').innerText = success.id;
+    document.getElementById('res-type').innerText = success.type;
+    document.getElementById('res-cbor').innerText = JSON.stringify(parseAttestationObject(success.response.attestationObject));
+    document.getElementById('res-json').innerText = uint8ToString(success.response.clientDataJSON);
+
+    console.log({ success });
+
+    setEvent('create request.')
+
+    $.post("https://localhost:8080/regist", {
+      id: PublicKeyCredential.id,
+      attestationObject: b64encode(PublicKeyCredential.response.attestationObject),
+      clientDataJSON: b64encode(PublicKeyCredential.response.clientDataJSON),
+    }, (res) => {
+      console.log(res);
+      setEvent('create success.');
+    });
+  }).catch(error => {
+    document.getElementById('error').innerText = error.message;
+    console.log({ error })
+    setEvent('create error.');
+  });
+}
+
+function get() {
+  setEvent('get start.');
+  navigator.credentials.get({
+    publicKey: {
+//      rpId: 'localhost',
+//      userVerification: 'required',
+      allowCredentials: [
+        {
+          transports: ['internal'],
+          type: 'public-key',
+          id: registId,
+        },
+      ],
+      challenge: toBuffer16('my_challenge'),
+    },
+  }).then(success => {
+
+    document.getElementById('get-id').innerText = success.id;
+    document.getElementById('get-type').innerText = success.type;
+    document.getElementById('get-cbor').innerText = JSON.stringify(parseAuthenticatorData(success.response.authenticatorData));
+    document.getElementById('get-json').innerText = uint8ToString(success.response.clientDataJSON);
+    document.getElementById('get-uh').innerText = h(new Uint8Array(success.response.userHandle));
+
+    console.log(new Uint8Array(success.response.signature));
+
+    console.log({ success });
+
+    setEvent('get request.');
+
+    $.post("https://localhost:8080/auth", {
+      id: b64encode(PublicKeyCredential.rawId),
+      authenticatorData: b64encode(PublicKeyCredential.response.authenticatorData),
+      clientDataJSON: b64encode(PublicKeyCredential.response.clientDataJSON),
+      signature: b64encode(PublicKeyCredential.response.signature),
+    }, (res) => {
+      console.log(res);
+      setEvent('get success.');
+    });
+  }).catch(error => {
+    document.getElementById('error').innerText = error.message;
+    console.log({ error })
+    setEvent('get error.');
+  });
+}
+
+// 検証
+function invalidSignature() {
+  return false;
+}
+</script>
+</body>
+</html>

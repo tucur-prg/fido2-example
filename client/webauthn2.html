@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+     content="width=320,
+        height=480,
+        initial-scale=1.0,
+        minimum-scale=1.0,
+        maximum-scale=2.0,
+        user-scalable=yes" />
+
+  <title>WebAuthn</title>
+  <script src="https://unpkg.com/cbor-js-unofficial@0.1.0-a4/cbor.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+  <button onClick="regist();">Regist Request</button>
+  <button onClick="auth();">Auth Request</button>
+  Chrome Addons: <a target="_blank" href="https://chrome.google.com/webstore/detail/virtual-authenticators-ta/gafbpmlmeiikmhkhiapjlfjgdioafmja?hl=ja">Virtual Authenticators Tab</a>
+  <hr>
+  <span id="support"></span><br>
+  <hr>
+  <span id="event"></span><br>
+  <hr>
+  <span id="error"></span><br>
+
+<script>
+function buffer(str) {
+  return (new Uint8Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }))).buffer;
+}
+
+function b64encode(buf) {
+  str = String.fromCharCode.apply(null, new Uint8Array(buf))
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+
+function b64decode(val) {
+  val = val
+    .replace(/\-/g, '+')
+    .replace(/\_/g, '/')
+    .padEnd(val.length + val.length % 4, '=')
+  return atob(val)
+}
+
+document.getElementById('support').innerText = ('credentials' in navigator) ? 'Support' : 'UnSupport';
+
+function setEvent(str) {
+  document.getElementById('event').innerText = "Event: " + str;
+}
+
+// --------
+function regist() {
+  setEvent('regist start.');
+  fetch('https://localhost:8080/regist')
+  .then((res) => {
+    if (res.ok) {
+      return res.json()
+    }
+    throw new Error('Error getting registration data!')
+  })
+  .then((res) => res['options'])
+  .then(b64decode)
+  .then(buffer)
+  .then(CBOR.decode)
+  .then((options) => {
+    console.log(options)
+    return navigator.credentials.create(options)
+  }).then((PublicKeyCredential) => {
+    setEvent('regist reqiest.');
+
+    $.post("https://localhost:8080/regist", {
+      id: PublicKeyCredential.id,
+      attestationObject: b64encode(PublicKeyCredential.response.attestationObject),
+      clientDataJSON: b64encode(PublicKeyCredential.response.clientDataJSON),
+    }, (res) => {
+      console.log(res);
+      setEvent('regist success.');
+    });
+  }).catch((error) => {
+    document.getElementById('error').innerText = error.message;
+    console.log({error})
+    setEvent('regist error.');
+  })
+}
+
+function auth() {
+  setEvent('auth start.');
+  fetch('https://localhost:8080/auth')
+  .then((res) => {
+    if (res.ok) {
+      return res.json()
+    }
+    throw new Error('Error getting registration data!')
+  })
+  .then((res) => res['options'])
+  .then(b64decode)
+  .then(buffer)
+  .then(CBOR.decode)
+  .then((options) => {
+    console.log(options)
+    return navigator.credentials.get(options)
+  }).then((PublicKeyCredential) => {
+    setEvent('auth reqiest.');
+
+    $.post("https://localhost:8080/auth", {
+      id: b64encode(PublicKeyCredential.rawId),
+      authenticatorData: b64encode(PublicKeyCredential.response.authenticatorData),
+      clientDataJSON: b64encode(PublicKeyCredential.response.clientDataJSON),
+      signature: b64encode(PublicKeyCredential.response.signature),
+    }, (res) => {
+      console.log(res);
+      setEvent('auth success.');
+    });
+  }).catch((error) => {
+    document.getElementById('error').innerText = error.message;
+    console.log({error})
+    setEvent('auth error.');
+  })
+}
+</script>
+</body>
+</html>
