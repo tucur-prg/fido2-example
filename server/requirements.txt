@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+python-multipart
+cbor2
+cryptography
+fido2

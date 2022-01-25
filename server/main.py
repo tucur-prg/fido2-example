@@ -148,6 +148,7 @@ async def regist(
 
 @app.post("/auth")
 async def auth(
+    id = Form(...),
     authenticatorData = Form(...),
     clientDataJSON = Form(...),
     signature = Form(...),
