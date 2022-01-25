@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  python:
+    container_name: python
+    image: python:3.8-slim-bullseye
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./server/:/app
+    working_dir: /app
+    command: ./start.sh
