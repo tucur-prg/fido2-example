@@ -178,11 +178,11 @@ function create() {
         },
       ],
       challenge: toBuffer16('my_challenge'),
-//      authenticatorSelection: {
+      authenticatorSelection: {
 //        userVerification: 'required',
-//        authenticatorAttachment: 'platform',
+        authenticatorAttachment: 'platform',
 //        requireResidentKey: true,
-//      },
+      },
     },
   }).then(success => {
     // success: PublicKeyCredential
