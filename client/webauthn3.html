@@ -35,13 +35,13 @@
   <b>ID</b> : <span id="res-id"></span><br>
   <b>Type</b> : <span id="res-type"></span><br>
   <b>CBOR</b> : <span id="res-cbor"></span><br>
-  <b>JSON</b> : <span id="res-json"></span><br>
+  <b>clientDataJSON</b> : <span id="res-json"></span><br>
   <hr>
   <h2>navigator.credentials.get()</h2>
   <b>ID</b> : <span id="get-id"></span><br>
   <b>Type</b> : <span id="get-type"></span><br>
   <b>CBOR</b> : <span id="get-cbor"></span><br>
-  <b>JSON</b> : <span id="get-json"></span><br>
+  <b>ClientDataJSON</b> : <span id="get-json"></span><br>
   <b>userHandle</b> : <span id="get-uh"></span><br>
   <hr>
   <span id="error"></span><br>
@@ -112,19 +112,19 @@ function parseAttestationObject(attestationObject) {
   const credentialId = attestation.authData.slice(55, 55 + credentialIdLength);
   const credentialPublicKey = attestation.authData.slice(55 + credentialIdLength);
 
-  console.log("rpIdHash", h(rpIdHash));
+  console.log("attestation.rpIdHash:", h(rpIdHash));
 
-  console.log("flags", flags);
-  console.log("UP", Boolean(flags & 0x01));
-  console.log("UV", Boolean(flags & 0x04));
+  console.log("attestation.flags:", flags);
+  console.log("attestation.flags.UP:", Boolean(flags & 0x01));
+  console.log("attestation.flags.UV:", Boolean(flags & 0x04));
 
-  console.log("SignCount", signCount);
+  console.log("attestation.SignCount:", signCount);
 
   let t = h(aaguid);
-  console.log("AAGUID", t.slice(0, 8) + '-' + t.slice(8, 12) + '-' + t.slice(12, 16) + '-' + t.slice(16));
+  console.log("attestation.AAGUID:", t.slice(0, 8) + '-' + t.slice(8, 12) + '-' + t.slice(12, 16) + '-' + t.slice(16));
 
-  console.log("credentialId", credentialId);
-  console.log("credentialPublicKey", credentialPublicKey);
+  console.log("attestation.credentialId:", credentialId);
+  console.log("attestation.credentialPublicKey:", credentialPublicKey);
 
   const publicKeyCbor = CBOR.decode(credentialPublicKey.buffer);
   console.log(publicKeyCbor);
@@ -136,7 +136,7 @@ function parseAttestationObject(attestationObject) {
       x: publicKeyCbor[-2],
       y: publicKeyCbor[-3],
     }
-    console.log("publicKeyJwk", publicKeyJwk);
+    console.log("attestation.credentialPublicKey: publicKeyJwk:", publicKeyJwk);
   }
 
   return attestation;
@@ -149,13 +149,13 @@ function parseAuthenticatorData(authenticatorData) {
   const flags = authenticator[32];
   const signCount = (authenticator[33] << 24) | (authenticator[34] << 16) | (authenticator[35] << 8) | authenticator[36];
 
-  console.log("rpIdHash", h(rpIdHash));
+  console.log("authenticatorData.rpIdHash", h(rpIdHash));
 
-  console.log("flags", flags);
-  console.log("UP", Boolean(flags & 0x01));
-  console.log("UV", Boolean(flags & 0x04));
+  console.log("authenticatorData.flags", flags);
+  console.log("authenticatorData.flags.UP", Boolean(flags & 0x01));
+  console.log("authenticatorData.flags.UV", Boolean(flags & 0x04));
 
-  console.log("SignCount", signCount);
+  console.log("authenticatorData.SignCount", signCount);
 
   return authenticator;
 }
@@ -225,7 +225,7 @@ function get() {
     });
   }
 
-  console.log(allowCredentials);
+  console.log("credentials.get: publicKey.allowCredentials:", allowCredentials);
 
   setEvent('get start.');
   navigator.credentials.get({
