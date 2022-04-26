@@ -23,7 +23,7 @@
 
 <body>
   <div>
-    RpID <input type="text" id="rp-id" value="localhost">
+    RpID <input type="text" id="rp-id" value="">
     UserID <input type="text" id="user-id">
   </div>
   <button onClick="create();">Create Security Key</button>
@@ -258,6 +258,10 @@ function get() {
 function invalidSignature() {
   return false;
 }
+
+$(() => {
+  $("#rp-id").val(location.hostname);
+});
 </script>
 </body>
 </html>
