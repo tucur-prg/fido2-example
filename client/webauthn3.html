@@ -112,19 +112,19 @@ function parseAttestationObject(attestationObject) {
   const credentialId = attestation.authData.slice(55, 55 + credentialIdLength);
   const credentialPublicKey = attestation.authData.slice(55 + credentialIdLength);
 
-  console.log(h(rpIdHash));
+  console.log("rpIdHash", h(rpIdHash));
 
-  console.log(flags);
-  console.log(Boolean(flags & 0x01));
-  console.log(Boolean(flags & 0x04));
+  console.log("flags", flags);
+  console.log("UP", Boolean(flags & 0x01));
+  console.log("UV", Boolean(flags & 0x04));
 
-  console.log(signCount);
+  console.log("SignCount", signCount);
 
   let t = h(aaguid);
-  console.log(t.slice(0, 8) + '-' + t.slice(8, 12) + '-' + t.slice(12, 16) + '-' + t.slice(16));
+  console.log("AAGUID", t.slice(0, 8) + '-' + t.slice(8, 12) + '-' + t.slice(12, 16) + '-' + t.slice(16));
 
-  console.log(credentialId);
-  console.log(credentialPublicKey);
+  console.log("credentialId", credentialId);
+  console.log("credentialPublicKey", credentialPublicKey);
 
   const publicKeyCbor = CBOR.decode(credentialPublicKey.buffer);
   console.log(publicKeyCbor);
@@ -136,6 +136,7 @@ function parseAttestationObject(attestationObject) {
       x: publicKeyCbor[-2],
       y: publicKeyCbor[-3],
     }
+    console.log("publicKeyJwk", publicKeyJwk);
   }
 
   return attestation;
@@ -148,13 +149,13 @@ function parseAuthenticatorData(authenticatorData) {
   const flags = authenticator[32];
   const signCount = (authenticator[33] << 24) | (authenticator[34] << 16) | (authenticator[35] << 8) | authenticator[36];
 
-  console.log(h(rpIdHash));
+  console.log("rpIdHash", h(rpIdHash));
 
-  console.log(flags);
-  console.log(Boolean(flags & 0x01));
-  console.log(Boolean(flags & 0x04));
+  console.log("flags", flags);
+  console.log("UP", Boolean(flags & 0x01));
+  console.log("UV", Boolean(flags & 0x04));
 
-  console.log(signCount);
+  console.log("SignCount", signCount);
 
   return authenticator;
 }
