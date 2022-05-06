@@ -16,8 +16,12 @@
 </head>
 
 <body>
+  <div>
+    <input type="text" id="url" value="myapp://open">
+  </div>
   <button onClick="create();">Create Security Key</button>
   <button onClick="get();">Get Security Key</button>
+  <button onClick="toApp();">to app</button>
   <hr>
   <span id="error"></span><br>
   <hr>
@@ -89,11 +93,16 @@ function get() {
       challenge: toBuffer8('my_challenge.my_challenge'),
     },
   }).then(success => {
-    location.href = "myapp://open"
+    location.href = $("#url").val();
   }).catch(error => {
     document.getElementById('error').innerText = error.message;
   });
 }
+
+function toApp() {
+  location.href = $("#url").val();
+}
+
 </script>
 </body>
 </html>
