@@ -93,7 +93,7 @@ function get() {
       challenge: toBuffer8('my_challenge.my_challenge'),
     },
   }).then(success => {
-    location.href = $("#url").val();
+    toApp();
   }).catch(error => {
     document.getElementById('error').innerText = error.message;
   });
