@@ -25,6 +25,7 @@
   <div>
     RpID <input type="text" id="rp-id" value="">
     UserID <input type="text" id="user-id">
+    AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select>
   </div>
   <button onClick="create();">Create Security Key</button>
   <button onClick="get();">Get Security Key</button>
@@ -123,6 +124,7 @@ function parseAttestationObject(attestationObject) {
   let t = h(aaguid);
   console.log("attestation.AAGUID:", t.slice(0, 8) + '-' + t.slice(8, 12) + '-' + t.slice(12, 16) + '-' + t.slice(16));
 
+  console.log("attestation.credentialIdLength", credentialIdLength);
   console.log("attestation.credentialId:", credentialId);
   console.log("attestation.credentialPublicKey:", credentialPublicKey);
 
@@ -164,6 +166,7 @@ function parseAuthenticatorData(authenticatorData) {
 function create() {
   let rpId = $("#rp-id").val();
   let userId = $("#user-id").val();
+  let authenticatorAttachment = $("#authenticatorAttachment").val();
 
   setEvent('create start.');
   navigator.credentials.create({
@@ -191,7 +194,7 @@ function create() {
       challenge: toBuffer16(challenge),
       authenticatorSelection: {
         userVerification: 'required',
-        authenticatorAttachment: 'platform',
+        authenticatorAttachment: authenticatorAttachment,
         requireResidentKey: true,
       },
     },
@@ -215,11 +218,12 @@ function create() {
 
 function get() {
   let rpId = $("#rp-id").val();
+  let authenticatorAttachment = $("#authenticatorAttachment").val();
   let allowCredentials = [];
 
   for (const _registId of registId) {
     allowCredentials.push({
-      transports: ['internal'],
+      transports: ['internal', 'usb'],
       type: 'public-key',
       id: _registId,
     });
