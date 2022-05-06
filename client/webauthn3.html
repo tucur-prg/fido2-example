@@ -26,6 +26,7 @@
     RpID <input type="text" id="rp-id" value="">
     UserID <input type="text" id="user-id">
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select>
+    <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label>
   </div>
   <button onClick="create();">Create Security Key</button>
   <button onClick="get();">Get Security Key</button>
@@ -167,6 +168,7 @@ function create() {
   let rpId = $("#rp-id").val();
   let userId = $("#user-id").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
+  let requireResidentKey = $("#requireResidentKey").prop("checked");
 
   setEvent('create start.');
   navigator.credentials.create({
@@ -195,7 +197,7 @@ function create() {
       authenticatorSelection: {
         userVerification: 'required',
         authenticatorAttachment: authenticatorAttachment,
-        requireResidentKey: true,
+        requireResidentKey: requireResidentKey,
       },
     },
   }).then(success => {
