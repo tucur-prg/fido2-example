@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+     content="width=320,
+        height=480,
+        initial-scale=1.0,
+        minimum-scale=1.0,
+        maximum-scale=2.0,
+        user-scalable=yes" />
+
+  <title>WebAuthn</title>
+  <script src="https://unpkg.com/cbor-js-unofficial@0.1.0-a4/cbor.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+  <button onClick="create();">Create Security Key</button>
+  <button onClick="get();">Get Security Key</button>
+  <hr>
+  <span id="error"></span><br>
+  <hr>
+  <span id="support"></span><br>
+
+<script>
+function toBuffer8(str) {
+  return new Uint8Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }));
+}
+
+let registId;
+
+document.getElementById('support').innerText = ('credentials' in navigator) ? 'Support' : 'UnSupport';
+
+// Button Event
+function create() {
+  navigator.credentials.create({
+    publicKey: {
+      rp: {
+        name: 'WebAuthn Test',
+      },
+      user: {
+        id: toBuffer8('hogehoge'),
+        name: 'webauthn@example.com',
+        displayName: 'Hoge',
+      },
+      attestation: 'direct',
+      pubKeyCredParams: [
+        {
+          type: 'public-key',
+          alg: -7,
+        },
+        {
+          type: 'public-key',
+          alg: -257
+        },
+      ],
+      challenge: toBuffer8('my_challenge.my_challenge'),
+      authenticatorSelection: {
+        userVerification: 'required',
+        authenticatorAttachment: 'platform',
+        requireResidentKey: true,
+      },
+    },
+  }).then(success => {
+    registId = success.rawId;
+    alert("Regist OK");
+  }).catch(error => {
+    document.getElementById('error').innerText = error.message;
+  });
+}
+
+function get() {
+  let allowCredentials = [];
+
+  if (registId) {
+    allowCredentials.push({
+      transports: ['internal'],
+      type: 'public-key',
+      id: registId,
+    })
+  }
+  navigator.credentials.get({
+    publicKey: {
+      userVerification: 'required',
+      allowCredentials: allowCredentials,
+      challenge: toBuffer8('my_challenge.my_challenge'),
+    },
+  }).then(success => {
+    location.href = "myapp://open"
+  }).catch(error => {
+    document.getElementById('error').innerText = error.message;
+  });
+}
+</script>
+</body>
+</html>
