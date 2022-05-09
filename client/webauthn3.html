@@ -27,6 +27,8 @@
     UserID <input type="text" id="user-id">
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select>
     <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label>
+    <br>
+    CredentialId <input type="text" id="credential-id" size="140">
   </div>
   <button onClick="create();">Create Security Key</button>
   <button onClick="get();">Get Security Key</button>
@@ -90,7 +92,7 @@ function b64decode(val) {
   val = val
     .replace(/\-/g, '+')
     .replace(/\_/g, '/')
-    .padEnd(val.length + val.length % 4, '=')
+    .padEnd(val.length + (4 - val.length % 4), '=')
   return atob(val)
 }
 
@@ -209,6 +211,7 @@ function create() {
     registId.push(success.rawId);
 
     console.log({ success });
+    console.log(b64encode(success.rawId));
 
     setEvent('create success.');
   }).catch(error => {
@@ -220,6 +223,7 @@ function create() {
 
 function get() {
   let rpId = $("#rp-id").val();
+  let credentialId = $("#credential-id").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
   let allowCredentials = [];
 
@@ -228,6 +232,14 @@ function get() {
       transports: ['internal', 'usb'],
       type: 'public-key',
       id: _registId,
+    });
+  }
+
+  if (credentialId) {
+    allowCredentials.push({
+      transports: ['internal', 'usb'],
+      type: 'public-key',
+      id: toBuffer8(b64decode(credentialId)),
     });
   }
 
