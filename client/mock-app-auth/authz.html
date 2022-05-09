@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+     content="width=320,
+        height=480,
+        initial-scale=1.0,
+        minimum-scale=1.0,
+        maximum-scale=2.0,
+        user-scalable=yes" />
+
+  <title>Authz</title>
+  <style>
+    .container {
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    button {
+      margin: 12px;
+    }
+    div {
+      text-align: center;
+    }
+    span {
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div>
+      <button onclick="create();">事前登録</button>
+      <br>
+      <br>
+      <br>
+      <span>アプリがリソースへのアクセス許可を求めています。</span>
+      <br>
+      <button onclick="success();">はい</button>
+      <button onclick="failer();">いいえ</button>
+    </div>
+  </div>
+</body>
+
+<script>
+let baseUrl = 'app-auth://open'
+let state = location.search.split('&').map(x => x.split('=')).filter(x => x[0] == 'state')[0][1]
+
+let registId;
+
+function toBuffer8(str) {
+  return new Uint8Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }));
+}
+
+function create() {
+  navigator.credentials.create({
+    publicKey: {
+      rp: {
+        name: 'WebAuthn Test',
+      },
+      user: {
+        id: toBuffer8('user1234'),
+        name: 'webauthn@example.com',
+        displayName: 'Disp User1234',
+      },
+      attestation: 'direct',
+      pubKeyCredParams: [
+        {
+          type: 'public-key',
+          alg: -7,
+        },
+        {
+          type: 'public-key',
+          alg: -257
+        },
+      ],
+      challenge: toBuffer8('my_challenge.my_challenge'),
+      authenticatorSelection: {
+        userVerification: 'required',
+        authenticatorAttachment: 'platform',
+        requireResidentKey: true,
+      },
+    },
+  }).then(success => {
+    registId = success.rawId;
+    alert("Regist OK");
+  }).catch(error => {
+    alert(error.message);
+  });
+}
+
+function success() {
+  let allowCredentials = [];
+
+  if (registId) {
+    allowCredentials.push({
+      transports: ['internal'],
+      type: 'public-key',
+      id: registId,
+    })
+  }
+
+  navigator.credentials.get({
+    publicKey: {
+      userVerification: 'required',
+      allowCredentials: allowCredentials,
+      challenge: toBuffer8('my_challenge.my_challenge'),
+    },
+  }).then(success => {
+    location.href = baseUrl + '?code=1234&state=' + state;
+  }).catch(error => {
+    alert(error.message);
+  });
+}
+function failer() {
+  location.href = baseUrl + '?error=cancel&state=' + state;
+}
+</script>
+
+</html>
