@@ -46,10 +46,10 @@
 </body>
 
 <script>
+let registId;
+
 let baseUrl = 'app-auth://open'
 let state = location.search.split('&').map(x => x.split('=')).filter(x => x[0] == 'state')[0][1]
-
-let registId = false;
 
 function toBuffer8(str) {
   return new Uint8Array([].map.call(str, c => {
