@@ -112,7 +112,9 @@ function success() {
       challenge: toBuffer8('my_challenge.my_challenge'),
     },
   }).then(success => {
-    location.href = baseUrl + '?code=1234&state=' + state;
+    setTimeout(() => {
+      location.href = baseUrl + '?code=1234&state=' + state;
+    }, 1000);
   }).catch(error => {
     alert(error.message);
   });
