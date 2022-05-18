@@ -103,7 +103,6 @@ async def regist(
     logger.info("attestation.attStmt: {}".format(attestation['attStmt']))
     if attestation['fmt'] == 'packed':
         if 'x5c' in attestation['attStmt']:
-            signature = attestation['attStmt']['sig']
             attestnCert = attestation['attStmt']['x5c'][0]
 
             cert = x509.load_der_x509_certificate(attestnCert, default_backend())
@@ -119,15 +118,25 @@ async def regist(
             logger.info("x5c.signature: {}".format(cert.signature))
 
             pn = cert.public_key().public_numbers()
+        else:
+            pn = jwk(cbor2.loads(credentialPublicKey))
+            pn = type("dummy", (object, ), pn)
+
+            pn.x = int(decode(pn.x).hex(), 16)
+            pn.y = int(decode(pn.y).hex(), 16)
+
+        try:
+            logger.info("public_number: {}, {}".format(pn.x, pn.y))
+
+            signature = attestation['attStmt']['sig']
             clientDataHash = hashlib.sha256(decode(clientDataJSON)).digest()
             message = attestation['authData'] + clientDataHash
 
-            try:
-                ec.EllipticCurvePublicNumbers(pn.x, pn.y, ec.SECP256R1()) \
-                .public_key(default_backend()) \
-                .verify(signature, message, ec.ECDSA(hashes.SHA256()))
-            except:
-                return {"error": "Invalid Signature"}
+            ec.EllipticCurvePublicNumbers(pn.x, pn.y, ec.SECP256R1()) \
+            .public_key(default_backend()) \
+            .verify(signature, message, ec.ECDSA(hashes.SHA256()))
+        except:
+            return {"error": "Invalid Signature"}
 
     '''
     id, jwk(credentialPublicKey), signCount を保存
