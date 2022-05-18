@@ -87,10 +87,22 @@ document.getElementById('support').innerText = ('credentials' in navigator) ? 'S
 
 // Button Event
 function create() {
+  document.getElementById('error').innerText = "";
+
   let rpId = $("#rp-id").val();
   let userId = $("#user-id").val();
+  let credentialId = $("#credential-id").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
   let requireResidentKey = $("#requireResidentKey").prop("checked");
+  let excludeCredentials = []
+
+  if (credentialId) {
+    excludeCredentials.push({
+      transports: ['internal'],
+      type: 'public-key',
+      id: toBuffer8(b64decode(credentialId)),
+    });
+  }
 
   navigator.credentials.create({
     publicKey: {
@@ -115,6 +127,7 @@ function create() {
         },
       ],
       challenge: toBuffer8(challenge),
+      excludeCredentials: excludeCredentials,
       authenticatorSelection: {
         userVerification: 'required',
         authenticatorAttachment: authenticatorAttachment,
@@ -142,6 +155,8 @@ function create() {
 }
 
 function get() {
+  document.getElementById('error').innerText = "";
+
   let rpId = $("#rp-id").val();
   let credentialId = $("#credential-id").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
