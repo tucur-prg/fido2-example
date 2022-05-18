@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+     content="width=320,
+        height=480,
+        initial-scale=1.0,
+        minimum-scale=1.0,
+        maximum-scale=2.0,
+        user-scalable=yes" />
+
+  <title>WebAuthn</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+  h2 {
+    font-size: 18px;
+    margin: 0;
+  }
+  </style>
+</head>
+
+<body>
+  <div>
+    RpID <input type="text" id="rp-id" value="">
+    UserID <input type="text" id="user-id">
+    AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select>
+    <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label>
+    <br>
+    CredentialId <input type="text" id="credential-id" size="140">
+  </div>
+  <button onClick="create();">Create Security Key</button>
+  <button onClick="get();">Get Security Key</button>
+  <hr>
+  <h2>navigator.credentials.create()</h2>
+  <b>ID</b> : <span id="res-id"></span><br>
+  <b>Type</b> : <span id="res-type"></span><br>
+  <b>AttestationObject</b> : <span id="res-cbor"></span><br>
+  <b>ClientDataJSON</b> : <span id="res-json"></span><br>
+  <hr>
+  <h2>navigator.credentials.get()</h2>
+  <b>ID</b> : <span id="get-id"></span><br>
+  <b>Type</b> : <span id="get-type"></span><br>
+  <b>AuthenticatorData</b> : <span id="get-cbor"></span><br>
+  <b>ClientDataJSON</b> : <span id="get-json"></span><br>
+  <b>UserHandle</b> : <span id="get-uh"></span><br>
+  <hr>
+  <span id="error"></span><br>
+  <hr>
+  <span id="support"></span><br>
+
+<script>
+function toBuffer8(str) {
+  return new Uint8Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }));
+}
+
+function uint8ToString(buf) {
+  return String.fromCharCode.apply("", new Uint8Array(buf));
+}
+
+function h(v, spacer='') {
+  return [].map.call(v, x => ("00" + x.toString(16)).slice(-2)).join(spacer)
+}
+
+function b64encode(buf) {
+  str = String.fromCharCode.apply(null, new Uint8Array(buf))
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+function b64decode(val) {
+  val = val
+    .replace(/\-/g, '+')
+    .replace(/\_/g, '/')
+    .padEnd(val.length + (4 - val.length % 4), '=')
+  return atob(val)
+}
+
+let challenge = "my_challenge.my_challenge";
+let registId = [];
+
+document.getElementById('support').innerText = ('credentials' in navigator) ? 'Support' : 'UnSupport';
+
+// Button Event
+function create() {
+  let rpId = $("#rp-id").val();
+  let userId = $("#user-id").val();
+  let authenticatorAttachment = $("#authenticatorAttachment").val();
+  let requireResidentKey = $("#requireResidentKey").prop("checked");
+
+  navigator.credentials.create({
+    publicKey: {
+      rp: {
+        id: rpId,
+        name: 'WebAuthn Test',
+      },
+      user: {
+        id: toBuffer8(userId),
+        name: 'Name ' + userId,
+        displayName: 'DisplayName ' + userId,
+      },
+      attestation: 'direct',
+      pubKeyCredParams: [
+        {
+          type: 'public-key',
+          alg: -7,
+        },
+        {
+          type: 'public-key',
+          alg: -257
+        },
+      ],
+      challenge: toBuffer8(challenge),
+      authenticatorSelection: {
+        userVerification: 'required',
+        authenticatorAttachment: authenticatorAttachment,
+        requireResidentKey: requireResidentKey,
+      },
+    },
+  }).then(success => {
+    document.getElementById('res-id').innerText = success.id;
+    document.getElementById('res-type').innerText = success.type;
+    document.getElementById('res-cbor').innerText = JSON.stringify(CBOR.decode(success.response.attestationObject));
+    document.getElementById('res-json').innerText = uint8ToString(success.response.clientDataJSON);
+
+    registId.push(success.rawId);
+
+    $.post("/regist", {
+      id: success.id,
+      attestationObject: b64encode(success.response.attestationObject),
+      clientDataJSON: b64encode(success.response.clientDataJSON),
+    }, (res) => {
+      console.log(res);
+    });
+  }).catch(error => {
+    document.getElementById('error').innerText = error.message;
+  });
+}
+
+function get() {
+  let rpId = $("#rp-id").val();
+  let credentialId = $("#credential-id").val();
+  let authenticatorAttachment = $("#authenticatorAttachment").val();
+  let allowCredentials = [];
+
+  for (const _registId of registId) {
+    allowCredentials.push({
+      transports: ['internal', 'usb'],
+      type: 'public-key',
+      id: _registId,
+    });
+  }
+
+  if (credentialId) {
+    allowCredentials.push({
+      transports: ['internal', 'usb'],
+      type: 'public-key',
+      id: toBuffer8(b64decode(credentialId)),
+    });
+  }
+
+  navigator.credentials.get({
+    publicKey: {
+      rpId: rpId,
+      userVerification: 'required',
+      allowCredentials: allowCredentials,
+      challenge: toBuffer8(challenge),
+    },
+  }).then(success => {
+    document.getElementById('get-id').innerText = success.id;
+    document.getElementById('get-type').innerText = success.type;
+    document.getElementById('get-cbor').innerText = JSON.stringify(new Uint8Array(success.response.authenticatorData));
+    document.getElementById('get-json').innerText = uint8ToString(success.response.clientDataJSON);
+    document.getElementById('get-uh').innerText = h(new Uint8Array(success.response.userHandle));
+
+    $.post("/auth", {
+      id: b64encode(success.rawId),
+      authenticatorData: b64encode(success.response.authenticatorData),
+      clientDataJSON: b64encode(success.response.clientDataJSON),
+      signature: b64encode(success.response.signature),
+    }, (res) => {
+      console.log(res);
+    });
+  }).catch(error => {
+    document.getElementById('error').innerText = error.message;
+  });
+}
+
+$(() => {
+  $("#rp-id").val(location.hostname);
+});
+</script>
+</body>
+</html>
