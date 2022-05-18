@@ -82,8 +82,8 @@ async def regist(
     # flags
     flags = attestation['authData'][32]
     logger.info("attestation.authData.flags: {}".format(bin(flags)))
-    logger.info("UP: {}".format(bool(flags & 0x01))) # UP == true
-    logger.info("UV: {}".format(bool(flags & 0x04))) # UV == true
+    logger.info("User Present: {}".format(bool(flags & 0x01))) # UP == true
+    logger.info("User Verified: {}".format(bool(flags & 0x04))) # UV == true
 
     # signCount
     signCount = attestation['authData'][33] << 24 | attestation['authData'][34] << 16 | attestation['authData'][35] << 8 | attestation['authData'][36]
@@ -172,8 +172,8 @@ async def auth(
     # flags
     flags = authenticator[32]
     logger.info("authenticator.flags: {}".format(bin(flags)))
-    logger.info("UP: {}".format(bool(flags & 0x01))) # UP == true
-    logger.info("UV: {}".format(bool(flags & 0x04))) # UV == true
+    logger.info("User Present: {}".format(bool(flags & 0x01))) # UP == true
+    logger.info("User Verified: {}".format(bool(flags & 0x04))) # UV == true
 
     # signCount
     signCount = authenticator[33] << 24 | authenticator[34] << 16 | authenticator[35] << 8 | authenticator[36]
