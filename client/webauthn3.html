@@ -25,6 +25,7 @@
   <div>
     RpID <input type="text" id="rp-id" value="">
     UserID <input type="text" id="user-id">
+    Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select>
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select>
     <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label>
     <br>
@@ -169,6 +170,7 @@ function parseAuthenticatorData(authenticatorData) {
 function create() {
   let rpId = $("#rp-id").val();
   let userId = $("#user-id").val();
+  let attestation = $("#attestation").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
   let requireResidentKey = $("#requireResidentKey").prop("checked");
 
@@ -184,7 +186,7 @@ function create() {
         name: 'Name ' + userId,
         displayName: 'DisplayName ' + userId,
       },
-      attestation: 'direct',
+      attestation: attestation,
       pubKeyCredParams: [
         {
           type: 'public-key',
