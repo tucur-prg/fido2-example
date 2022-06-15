@@ -179,9 +179,9 @@ function create() {
       ],
       challenge: toBuffer16('my_challenge'),
       authenticatorSelection: {
-//        userVerification: 'required',
+        userVerification: 'required',
         authenticatorAttachment: 'platform',
-//        requireResidentKey: true,
+        requireResidentKey: true,
       },
     },
   }).then(success => {
@@ -200,9 +200,9 @@ function create() {
     setEvent('create request.')
 
     $.post("https://localhost:8080/regist", {
-      id: PublicKeyCredential.id,
-      attestationObject: b64encode(PublicKeyCredential.response.attestationObject),
-      clientDataJSON: b64encode(PublicKeyCredential.response.clientDataJSON),
+      id: success.id,
+      attestationObject: b64encode(success.response.attestationObject),
+      clientDataJSON: b64encode(success.response.clientDataJSON),
     }, (res) => {
       console.log(res);
       setEvent('create success.');
@@ -244,10 +244,10 @@ function get() {
     setEvent('get request.');
 
     $.post("https://localhost:8080/auth", {
-      id: b64encode(PublicKeyCredential.rawId),
-      authenticatorData: b64encode(PublicKeyCredential.response.authenticatorData),
-      clientDataJSON: b64encode(PublicKeyCredential.response.clientDataJSON),
-      signature: b64encode(PublicKeyCredential.response.signature),
+      id: b64encode(success.rawId),
+      authenticatorData: b64encode(success.response.authenticatorData),
+      clientDataJSON: b64encode(success.response.clientDataJSON),
+      signature: b64encode(success.response.signature),
     }, (res) => {
       console.log(res);
       setEvent('get success.');
