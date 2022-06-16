@@ -170,9 +170,18 @@ function parseAuthenticatorData(authenticatorData) {
 function create() {
   let rpId = $("#rp-id").val();
   let userId = $("#user-id").val();
+  let credentialId = $("#credential-id").val();
   let attestation = $("#attestation").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
   let requireResidentKey = $("#requireResidentKey").prop("checked");
+  let excludeCredentials = [];
+
+  if (credentialId) {
+    excludeCredentials.push({
+      type: 'public-key',
+      id: toBuffer8(b64decode(credentialId)),
+    });
+  }
 
   setEvent('create start.');
   navigator.credentials.create({
@@ -198,6 +207,7 @@ function create() {
         },
       ],
       challenge: toBuffer16(challenge),
+      excludeCredentials: excludeCredentials,
       authenticatorSelection: {
         userVerification: 'required',
         authenticatorAttachment: authenticatorAttachment,
