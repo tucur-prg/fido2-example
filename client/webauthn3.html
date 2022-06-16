@@ -168,6 +168,8 @@ function parseAuthenticatorData(authenticatorData) {
 
 // Button Event
 function create() {
+  document.getElementById('error').innerText = "";
+
   let rpId = $("#rp-id").val();
   let userId = $("#user-id").val();
   let credentialId = $("#credential-id").val();
@@ -234,6 +236,8 @@ function create() {
 }
 
 function get() {
+  document.getElementById('error').innerText = "";
+
   let rpId = $("#rp-id").val();
   let credentialId = $("#credential-id").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
