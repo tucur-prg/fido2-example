@@ -113,14 +113,14 @@ function success() {
     },
   }).then(success => {
     setTimeout(() => {
-      location.href = baseUrl + '?code=1234&state=' + state;
+      location.replace(baseUrl + '?code=1234&state=' + state);
     }, 1000);
   }).catch(error => {
     alert(error.message);
   });
 }
 function failer() {
-  location.href = baseUrl + '?error=cancel&state=' + state;
+  location.replace(baseUrl + '?error=cancel&state=' + state);
 }
 </script>
 
