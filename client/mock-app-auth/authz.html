@@ -48,7 +48,7 @@
 <script>
 let registId;
 
-let baseUrl = 'app-auth://open'
+let baseUrl = location.search.split('&').map(x => x.split('=')).filter(x => x[0] == 'redirect_uri')[0][1]
 let state = location.search.split('&').map(x => x.split('=')).filter(x => x[0] == 'state')[0][1]
 
 function toBuffer8(str) {
