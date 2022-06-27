@@ -41,6 +41,9 @@
       <br>
       <button onclick="success();">はい</button>
       <button onclick="failer();">いいえ</button>
+      <br>
+      <br>
+      <div id="console"></div>
     </div>
   </div>
 </body>
@@ -113,6 +116,7 @@ function success() {
     },
   }).then(success => {
     setTimeout(() => {
+      document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
       location.replace(baseUrl + '?code=1234&state=' + state);
     }, 1000);
   }).catch(error => {
@@ -120,6 +124,7 @@ function success() {
   });
 }
 function failer() {
+  document.getElementById('console').innerText = baseUrl + '?cerror=cancel&state=' + state;
   location.replace(baseUrl + '?error=cancel&state=' + state);
 }
 </script>
