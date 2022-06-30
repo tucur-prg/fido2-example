@@ -30,7 +30,7 @@
   </style>
 </head>
 
-<body onload="onload();">
+<body>
   <div class="container">
     <div>
       <button onclick="create();">事前登録</button>
@@ -106,10 +106,8 @@ async function create() {
 async function toApp() {
   await sleep(1000);
 
-  location.replace('http://10.0.2.2/redirect')
-
-//  document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
-//  location.replace(baseUrl + '?code=1234&state=' + state);
+  document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
+  location.replace(baseUrl + '?code=1234&state=' + state);
   console.log(baseUrl + '?code=1234&state=' + state);
 }
 
