@@ -30,7 +30,7 @@
   </style>
 </head>
 
-<body>
+<body onload="create();">
   <div class="container">
     <div>
       <button onclick="create();">事前登録</button>
@@ -91,7 +91,10 @@ function create() {
     },
   }).then(success => {
     registId = success.rawId;
-    alert("Regist OK");
+    setTimeout(() => {
+      document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
+      location.replace(baseUrl + '?code=1234&state=' + state);
+    }, 1000);
   }).catch(error => {
     alert(error.message);
   });
