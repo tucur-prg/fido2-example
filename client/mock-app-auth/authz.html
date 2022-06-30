@@ -104,10 +104,12 @@ async function create() {
 }
 
 async function toApp() {
-  await sleep(5000);
+  await sleep(1000);
 
-  document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
-  location.replace(baseUrl + '?code=1234&state=' + state);
+  locatin.replace('http://10.0.2.2/redirect')
+
+//  document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
+//  location.replace(baseUrl + '?code=1234&state=' + state);
   console.log(baseUrl + '?code=1234&state=' + state);
 }
 
