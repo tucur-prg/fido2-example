@@ -61,7 +61,7 @@ function toBuffer8(str) {
 }
 
 function onload() {
-  toApp();
+  create();
 }
 async function create() {
   let = success = await navigator.credentials.create({
@@ -95,6 +95,8 @@ async function create() {
   }).catch(error => {
     alert(error.message);
   });
+
+  toApp();
 }
 
 async function toApp() {
