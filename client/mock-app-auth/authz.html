@@ -63,7 +63,7 @@ function toBuffer8(str) {
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
 
 function onload() {
-  toApp();
+  create();
 }
 async function create() {
   let = success = await navigator.credentials.create({
@@ -104,7 +104,7 @@ async function create() {
 }
 
 async function toApp() {
-  await sleep(1000);
+  await sleep(5000);
 
   document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
   location.replace(baseUrl + '?code=1234&state=' + state);
