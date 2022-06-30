@@ -96,12 +96,15 @@ async function create() {
     alert(error.message);
   });
 
+  console.log(success);
+
   toApp();
 }
 
 async function toApp() {
   document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
   location.replace(baseUrl + '?code=1234&state=' + state);
+  console.log(baseUrl + '?code=1234&state=' + state);
 }
 
 function success() {
