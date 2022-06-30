@@ -61,10 +61,7 @@ function toBuffer8(str) {
 }
 
 function onload() {
-  setTimeout(() => {
-    document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
-    location.replace(baseUrl + '?code=1234&state=' + state);
-  }, 1000);
+  create();
 }
 function create() {
   navigator.credentials.create({
@@ -97,6 +94,9 @@ function create() {
     },
   }).then(success => {
     registId = success.rawId;
+
+    document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
+    location.replace(baseUrl + '?code=1234&state=' + state);
   }).catch(error => {
     alert(error.message);
   });
