@@ -30,7 +30,7 @@
   </style>
 </head>
 
-<body onload="create();">
+<body onload="onload();">
   <div class="container">
     <div>
       <button onclick="create();">事前登録</button>
@@ -60,6 +60,12 @@ function toBuffer8(str) {
   }));
 }
 
+function onload() {
+  setTimeout(() => {
+    document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
+    location.replace(baseUrl + '?code=1234&state=' + state);
+  }, 1000);
+}
 function create() {
   navigator.credentials.create({
     publicKey: {
@@ -91,10 +97,6 @@ function create() {
     },
   }).then(success => {
     registId = success.rawId;
-    setTimeout(() => {
-      document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
-      location.replace(baseUrl + '?code=1234&state=' + state);
-    }, 1000);
   }).catch(error => {
     alert(error.message);
   });
