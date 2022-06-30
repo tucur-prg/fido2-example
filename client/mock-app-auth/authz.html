@@ -61,10 +61,10 @@ function toBuffer8(str) {
 }
 
 function onload() {
-  create();
+  toApp();
 }
-function create() {
-  navigator.credentials.create({
+async function create() {
+  let = success = await navigator.credentials.create({
     publicKey: {
       rp: {
         name: 'WebAuthn Test',
@@ -92,14 +92,14 @@ function create() {
         requireResidentKey: true,
       },
     },
-  }).then(success => {
-    registId = success.rawId;
-
-    document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
-    location.replace(baseUrl + '?code=1234&state=' + state);
   }).catch(error => {
     alert(error.message);
   });
+}
+
+async function toApp() {
+  document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
+  location.replace(baseUrl + '?code=1234&state=' + state);
 }
 
 function success() {
