@@ -139,7 +139,7 @@ function success() {
 }
 function failer() {
   document.getElementById('console').innerText = baseUrl + '?cerror=cancel&state=' + state;
-  location.replace(baseUrl + '?error=cancel&error_description=cancel+click&state=' + state);
+  location.replace(baseUrl + '?error=invalid_request&error_description=cancel+click&state=' + state);
 }
 </script>
 
