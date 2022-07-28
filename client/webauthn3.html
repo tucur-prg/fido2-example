@@ -245,7 +245,7 @@ function get() {
 
   for (const _registId of registId) {
     allowCredentials.push({
-      transports: ['internal', 'usb'],
+      transports: ['internal'],
       type: 'public-key',
       id: _registId,
     });
@@ -253,7 +253,7 @@ function get() {
 
   if (credentialId) {
     allowCredentials.push({
-      transports: ['internal', 'usb'],
+      transports: ['internal'],
       type: 'public-key',
       id: toBuffer8(b64decode(credentialId)),
     });
