@@ -129,17 +129,17 @@ function success() {
       challenge: toBuffer8('my_challenge.my_challenge'),
     },
   }).then(success => {
-    setTimeout(() => {
+//    setTimeout(() => {
       document.getElementById('console').innerText = baseUrl + '?code=1234&state=' + state;
       location.replace(baseUrl + '?code=1234&state=' + state);
-    }, 1000);
+//    }, 1000);
   }).catch(error => {
     alert(error.message);
   });
 }
 function failer() {
   document.getElementById('console').innerText = baseUrl + '?cerror=cancel&state=' + state;
-  location.replace(baseUrl + '?error=invalid_request&error_description=cancel+click&state=' + state);
+  location.replace(baseUrl + '?error=orginal&state=' + state);
 }
 </script>
 
