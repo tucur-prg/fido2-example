@@ -38,9 +38,9 @@ function signIn() {
 
   const options = {
     "publicKey": {
-      challenge: "abcdefghijklmnopqrstuvwxyz"
+      challenge: "abcdefghijklmnopqrstuvwxyz",
+      mediation: "conditional",
     },
-    mediation: "conditional"
   };
 
   navigator.credentials.get(options)
