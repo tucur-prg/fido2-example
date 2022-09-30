@@ -44,7 +44,8 @@ function signIn() {
   };
 
   navigator.credentials.get(options)
-    .then(console.log);
+    .then(console.log)
+    .catch(console.log);
 }
 </script>
 
