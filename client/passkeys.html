@@ -15,6 +15,7 @@
 
 <script>
 function signIn() {
+  console.log("sign in")
   if (!PublicKeyCredential.isConditionalMediationAvailable ||
     !PublicKeyCredential.isConditionalMediationAvailable()) {
       console.log("not mediation");
