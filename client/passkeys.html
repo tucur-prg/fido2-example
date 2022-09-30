@@ -31,7 +31,7 @@ function signIn() {
       return false;
   }
 
-  navigator.credential.get({
+  navigator.credentials.get({
     "publicKey": {
       challenge: "abcdefghijklmnopqrstuvwxyz"
     },
