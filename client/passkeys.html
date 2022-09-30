@@ -27,17 +27,19 @@ function signIn() {
   console.log("sign in")
   if (!PublicKeyCredential.isConditionalMediationAvailable ||
     !PublicKeyCredential.isConditionalMediationAvailable()) {
-      console.log("not mediation");
+      alert("not mediation");
       return false;
   }
 
-  navigator.credentials.get({
+  const options = {
     "publicKey": {
       challenge: "abcdefghijklmnopqrstuvwxyz"
     },
     mediation: "conditional"
-  })
-  .then(console.log);
+  };
+
+  navigator.credentials.get(options)
+    .then(console.log);
 }
 </script>
 
