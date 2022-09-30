@@ -2,6 +2,14 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport"
+     content="width=320,
+        height=480,
+        initial-scale=1.0,
+        minimum-scale=1.0,
+        maximum-scale=2.0,
+        user-scalable=yes" />
+
   <title>Passkeys</title>
 </head>
 
@@ -9,6 +17,7 @@
 
 <form method="GET" onsubmit="return false;">
   <input type="text" name="username" autocomplete="username webauthn">
+  <input type="button" onclick="signin()">
 </form>
 
 </body>
