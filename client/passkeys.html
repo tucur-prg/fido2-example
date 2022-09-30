@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Passkeys</title>
+</head>
+
+<body>
+
+<form method="GET" onsubmit="return false;">
+  <input type="text" name="username" autocomplete="username webauthn">
+</form>
+
+</body>
+
+<script>
+function signIn() {
+  if (!PublicKeyCredential.isConditionalMediationAvailable ||
+    !PublicKeyCredential.isConditionalMediationAvailable()) {
+      console.log("not mediation");
+      return false;
+  }
+
+  navigator.credential.get({
+    "publicKey": {
+      challenge: "abcdefghijklmnopqrstuvwxyz"
+    },
+    mediation: "conditional"
+  })
+  .then(console.log);
+}
+</script>
+
+</html>
