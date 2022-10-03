@@ -13,16 +13,14 @@
   <title>Passkeys</title>
 </head>
 
-<body>
+<body onload="signIn()">
 
 <form method="GET" onsubmit="return false;">
   <input type="text" name="username" autocomplete="username webauthn">
-  <input type="button" name="click" value="click" onclick="signIn()">
 </form>
 
 <form method="GET" onsubmit="return false;">
   <input type="text" name="username" autocomplete="webauthn">
-  <input type="button" name="click" value="click" onclick="signIn()">
 </form>
 
 </body>
@@ -41,6 +39,7 @@ function signIn() {
       challenge: "abcdefghijklmnopqrstuvwxyz",
       mediation: "conditional",
     },
+    mediation: "conditional",
   };
 
   navigator.credentials.get(options)
