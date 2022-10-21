@@ -126,11 +126,11 @@ function parseAttestationObject(attestationObject) {
     'ED': Boolean(attestation.authData[32] & 0x80),
   };
   response['authData.signCount'] = (attestation.authData[33] << 24) | (attestation.authData[34] << 16) | (attestation.authData[35] << 8) | attestation.authData[36];
-  const t = h(attestation.authData.slice(37, 53));
-  response['authData.aaguid'] = t.slice(0, 8) + '-' + t.slice(8, 12) + '-' + t.slice(12, 16) + '-' + t.slice(16);
-  response['authData.credentialIdLength'] = (attestation.authData[53] << 8) + attestation.authData[54];
+  const aaguid = h(attestation.authData.slice(37, 53));
+  response['authData.aaguid'] = aaguid.slice(0, 8) + '-' + aaguid.slice(8, 12) + '-' + aaguid.slice(12, 16) + '-' + aaguid.slice(16);
+  const credentialIdLength = (attestation.authData[53] << 8) + attestation.authData[54]
+  response['authData.credentialIdLength'] = credentialIdLength;
   response['authData.credentialId'] = attestation.authData.slice(55, 55 + credentialIdLength);
-//  response['authData.credentialPublicKey'] = attestation.authData.slice(55 + credentialIdLength);
   response['authData.publicKeyCbor'] = CBOR.decode(attestation.authData.slice(55 + credentialIdLength).buffer);
 
   return response;
