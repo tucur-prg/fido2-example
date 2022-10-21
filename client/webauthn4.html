@@ -140,7 +140,7 @@ function parseAuthenticatorData(authenticatorData) {
   let authenticator = new Uint8Array(authenticatorData);
   let response = {};
 
-  response['rpIdHash'] h(authenticator.slice(0, 32));
+  response['rpIdHash'] = h(authenticator.slice(0, 32));
   response['flags'] = {
     'data': authenticator[32],
     'UP': Boolean(authenticator[32] & 0x01),
