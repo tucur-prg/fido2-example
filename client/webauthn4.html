@@ -30,14 +30,13 @@
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
     <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label><br>
     <br>
+    CredentialId <input type="text" id="credential-id" size="140">
     <div>
       Transports
       <label>internal <input type="checkbox" id="transportsInternal" value="1" checked></label>
       <label>hybrid <input type="checkbox" id="transportsHybrid" value="1"></label>
       <label>usb <input type="checkbox" id="transportsUsb" value="1"></label>
     </div>
-    <br>
-    CredentialId <input type="text" id="credential-id" size="140">
   </div>
   <br>
   <button onClick="create();">Create Security Key</button>
