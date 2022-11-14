@@ -30,6 +30,13 @@
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
     <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label><br>
     <br>
+    <div>
+      Transports
+      <label>internal <input type="checkbox" id="transportsInternal" value="1" checked></label>
+      <label>hybrid <input type="checkbox" id="transportsHybrid" value="1"></label>
+      <label>usb <input type="checkbox" id="transportsUsb" value="1"></label>
+    </div>
+    <br>
     CredentialId <input type="text" id="credential-id" size="140">
   </div>
   <br>
@@ -233,11 +240,26 @@ function get() {
   let rpId = $("#rp-id").val();
   let credentialId = $("#credential-id").val();
   let userVerification = $("#userVerification").val();
+  let transports = [];
   let allowCredentials = [];
+
+  let transportsInternal = $("#transportsInternal").prop("checked");
+  let transportsHybrid = $("#transportsHybrid").prop("checked");
+  let transportsUsb = $("#transportsUsb").prop("checked");
+
+  if (transportsInternal) {
+    transports.push('internal');
+  }
+  if (transportsHybrid) {
+    transports.push('hybrid');
+  }
+  if (transportsUsb) {
+    transports.push('usb');
+  }
 
   for (const _registId of registId) {
     allowCredentials.push({
-      transports: ['internal'],
+      transports: transports,
       type: 'public-key',
       id: _registId,
     });
@@ -245,7 +267,7 @@ function get() {
 
   if (credentialId) {
     allowCredentials.push({
-      transports: ['internal'],
+      transports: transports,
       type: 'public-key',
       id: toBuffer8(b64decode(credentialId)),
     });
