@@ -36,6 +36,8 @@
       <label>internal <input type="checkbox" id="transportsInternal" value="1" checked></label>
       <label>hybrid <input type="checkbox" id="transportsHybrid" value="1"></label>
       <label>usb <input type="checkbox" id="transportsUsb" value="1"></label>
+      <label>ble <input type="checkbox" id="transportsBle" value="1"></label>
+      <label>nfc <input type="checkbox" id="transportsNfc" value="1"></label>
     </div>
   </div>
   <br>
@@ -247,6 +249,8 @@ function get() {
   let transportsInternal = $("#transportsInternal").prop("checked");
   let transportsHybrid = $("#transportsHybrid").prop("checked");
   let transportsUsb = $("#transportsUsb").prop("checked");
+  let transportsBle = $("#transportsBle").prop("checked");
+  let transportsNfc = $("#transportsNfc").prop("checked");
 
   if (transportsInternal) {
     transports.push('internal');
@@ -256,6 +260,12 @@ function get() {
   }
   if (transportsUsb) {
     transports.push('usb');
+  }
+  if (transportsBle) {
+    transports.push('ble');
+  }
+  if (transportsNfc) {
+    transports.push('nfc');
   }
 
   for (const _registId of registId) {
