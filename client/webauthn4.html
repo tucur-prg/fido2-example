@@ -221,7 +221,7 @@ function create() {
     document.getElementById('create-type').innerText = success.type;
     document.getElementById('create-cbor').innerText = JSON.stringify(parseAttestationObject(success.response.attestationObject));
     document.getElementById('create-json').innerText = uint8ToString(success.response.clientDataJSON);
-    document.getElementById('create-transports').innerText = JSON.stringify(success.response.getTransports()));
+    document.getElementById('create-transports').innerText = JSON.stringify(success.response.getTransports());
 
     registId.push(success.rawId);
 
