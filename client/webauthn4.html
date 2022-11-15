@@ -225,7 +225,9 @@ function create() {
     document.getElementById('create-cbor').innerText = JSON.stringify(parseAttestationObject(success.response.attestationObject));
     document.getElementById('create-json').innerText = uint8ToString(success.response.clientDataJSON);
 
-    registId.push(success.rawId);
+//    registId.push(success.rawId);
+
+    $("#credential-id").val(success.id);
 
     console.log({ success });
 
