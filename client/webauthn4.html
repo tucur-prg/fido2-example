@@ -327,6 +327,7 @@ function autofill() {
       rpId: rpId,
       userVerification: userVerification,
       challenge: toBuffer8(challenge),
+      timeout: 300000,
     },
     signal: abortSignal,
     mediation: 'conditional',
