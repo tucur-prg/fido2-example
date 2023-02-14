@@ -118,7 +118,7 @@ let challenge = "my_challenge.my_challenge";
 let registId = [];
 
 document.getElementById('support').innerText = ('credentials' in navigator) ? 'Support' : 'UnSupport';
-document.getElementById('mediation').innerText = ('isConditionalMediationAvailable' in PublicKeyCredential) ? 'Support' : 'UnSupport';
+document.getElementById('mediation').innerText = ('isConditionalMediationAvailable' in PublicKeyCredential) ? 'Support' + (PublicKeyCredential.isConditionalMediationAvailable() ? '(true)' : '(false)') : 'UnSupport';
 
 function setEvent(str) {
   document.getElementById('event').innerText = "Event: " + str;
