@@ -118,7 +118,17 @@ let challenge = "my_challenge.my_challenge";
 let registId = [];
 
 document.getElementById('support').innerText = ('credentials' in navigator) ? 'Support' : 'UnSupport';
-document.getElementById('mediation').innerText = ('isConditionalMediationAvailable' in PublicKeyCredential) ? 'Support' + (PublicKeyCredential.isConditionalMediationAvailable() ? '(true)' : '(false)') : 'UnSupport';
+document.getElementById('mediation').innerText = ('isConditionalMediationAvailable' in PublicKeyCredential) ? 'Support' : 'UnSupport';
+if ('isConditionalMediationAvailable' in PublicKeyCredential) {
+  PublicKeyCredential.isConditionalMediationAvailable().then(res => {
+    console.log(res);
+    if (res) {
+      document.getElementById('mediation').innerText = 'Support (true)';
+    } else {
+      document.getElementById('mediation').innerText = 'Support (false)';
+    }
+  })
+}
 
 function setEvent(str) {
   document.getElementById('event').innerText = "Event: " + str;
