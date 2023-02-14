@@ -121,7 +121,6 @@ document.getElementById('support').innerText = ('credentials' in navigator) ? 'S
 document.getElementById('mediation').innerText = ('isConditionalMediationAvailable' in PublicKeyCredential) ? 'Support' : 'UnSupport';
 if ('isConditionalMediationAvailable' in PublicKeyCredential) {
   PublicKeyCredential.isConditionalMediationAvailable().then(res => {
-    console.log(res);
     if (res) {
       document.getElementById('mediation').innerText = 'Support (true)';
     } else {
