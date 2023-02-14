@@ -317,19 +317,19 @@ function get() {
   });
 }
 
-async function autofill() {
+function autofill() {
   let rpId = $("#rp-id").val();
   let userVerification = $("#userVerification").val();
 
   setEvent('autofill start.');
   navigator.credentials.get({
-    mediation: 'conditional',
-    signal: abortSignal,
     publicKey: {
       rpId: rpId,
       userVerification: userVerification,
       challenge: toBuffer8(challenge),
     }
+    signal: abortSignal,
+    mediation: 'conditional',
   }).then(success => {
     document.getElementById('get-id').innerText = success.id;
     document.getElementById('get-type').innerText = success.type;
