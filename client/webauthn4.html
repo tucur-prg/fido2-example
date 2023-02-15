@@ -9,6 +9,7 @@
         minimum-scale=1.0,
         maximum-scale=2.0,
         user-scalable=yes" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <title>WebAuthn</title>
   <script src="https://unpkg.com/cbor-js-unofficial@0.1.0-a4/cbor.js"></script>
@@ -24,8 +25,8 @@
 <body>
   <div>
     <form>
-    UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"><br>
     RpID <input type="text" id="rp-id" value=""><br>
+    UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"><br>
     UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
     Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
