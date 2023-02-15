@@ -25,6 +25,17 @@
 <body>
   <div>
     <form>
+      <div class="col-sm-12 mb-3">
+        <input
+          type="text"
+          class="form-control form-control-lg"
+          id="input-email"
+          placeholder="example_username"
+          x-model="username"
+          autocomplete="username webauthn"
+        />
+      </div>
+
       RpID <input type="text" id="rp-id" value=""><br>
       UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"><br>
       UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
