@@ -25,7 +25,7 @@
   <div>
     <form>
     RpID <input type="text" id="rp-id" value=""><br>
-    UserID <input type="text" id="user-id" name="username" x-modal="username" autocomplete="username webauthn"><br>
+    UserID <input type="text" id="user-id" name="username" placeholder="user id" x-modal="username" autocomplete="username webauthn"><br>
     UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
     Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
@@ -345,7 +345,7 @@ async function autofill2() {
       rpId: rpId,
       userVerification: userVerification,
       challenge: toBuffer8(challenge),
-      timeout: 300000,
+      timeout: 60000,
     },
     signal: abortSignal,
     mediation: 'conditional',
