@@ -333,7 +333,7 @@ function autofill() {
   PublicKeyCredential.isConditionalMediationAvailable()
     .then(async (supported) => {
 //      autofill2();
-      startAuthentication({
+      await startAuthentication({
         userVerification: "preferred",
         challenge: toBuffer8(challenge),
         rpId: "tucur-prg.github.io",
