@@ -23,6 +23,7 @@
 
 <body onload="autofill();">
   <div>
+    <form>
     RpID <input type="text" id="rp-id" value=""><br>
     UserID <input type="text" id="user-id" name="username" x-modal="username" autocomplete="username webauthn"><br>
     UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
@@ -39,6 +40,7 @@
       <label>ble <input type="checkbox" id="transportsBle" value="1"></label>
       <label>nfc <input type="checkbox" id="transportsNfc" value="1"></label>
     </div>
+    </form>
   </div>
   <br>
   <button onClick="create();">Create Security Key</button>
