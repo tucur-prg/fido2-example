@@ -21,7 +21,7 @@
   </style>
 </head>
 
-<body onload="autofill();">
+<body>
   <div>
     <form>
     RpID <input type="text" id="rp-id" value=""><br>
@@ -334,7 +334,7 @@ function autofill() {
       autofill2();
     });
 }
-function autofill2() {
+async function autofill2() {
   let rpId = $("#rp-id").val();
   let userVerification = $("#userVerification").val();
 
