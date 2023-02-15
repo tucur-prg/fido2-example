@@ -339,7 +339,7 @@ async function autofill2() {
   let userVerification = $("#userVerification").val();
 
   setEvent('autofill start.');
-  navigator.credentials.get({
+  let tmp = await navigator.credentials.get({
     publicKey: {
       allowCredentials: [],
       rpId: rpId,
@@ -349,7 +349,9 @@ async function autofill2() {
     },
     signal: abortSignal,
     mediation: 'conditional',
-  }).then(success => {
+  })
+  /*
+  .then(success => {
     document.getElementById('get-id').innerText = success.id;
     document.getElementById('get-type').innerText = success.type;
     document.getElementById('get-cbor').innerText = JSON.stringify(parseAuthenticatorData(success.response.authenticatorData));
@@ -365,6 +367,8 @@ async function autofill2() {
     console.log({ error })
     setEvent('autofill error.');
   });
+  */
+  console.log(tmp);
 }
 
 // 検証
