@@ -333,6 +333,7 @@ function autofill() {
   setEvent('autofill start.');
   navigator.credentials.get({
     publicKey: {
+      allowCredentials: [],
       rpId: rpId,
       userVerification: userVerification,
       challenge: toBuffer8(challenge),
