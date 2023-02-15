@@ -327,11 +327,17 @@ function get() {
 }
 
 function autofill() {
+  PublicKeyCredential.isConditionalMediationAvailable()
+    .then(supported => {
+      autofill2();
+    });
+}
+function autofill2() {
   let rpId = $("#rp-id").val();
   let userVerification = $("#userVerification").val();
 
   setEvent('autofill start.');
-  let op = {
+  navigator.credentials.get({
     publicKey: {
       allowCredentials: [],
       rpId: rpId,
@@ -341,8 +347,7 @@ function autofill() {
     },
     signal: abortSignal,
     mediation: 'conditional',
-  };
-  navigator.credentials.get(op).then(success => {
+  }).then(success => {
     document.getElementById('get-id').innerText = success.id;
     document.getElementById('get-type').innerText = success.type;
     document.getElementById('get-cbor').innerText = JSON.stringify(parseAuthenticatorData(success.response.authenticatorData));
