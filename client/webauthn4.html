@@ -24,8 +24,8 @@
 <body>
   <div>
     <form>
+    UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"><br>
     RpID <input type="text" id="rp-id" value=""><br>
-    UserID <input type="text" id="user-id" name="username" placeholder="user id" x-modal="username" autocomplete="username webauthn"><br>
     UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
     Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
@@ -331,15 +331,15 @@ function get() {
 function autofill() {
   PublicKeyCredential.isConditionalMediationAvailable()
     .then(async (supported) => {
-      await autofill2();
+      autofill2();
     });
 }
-async function autofill2() {
+function autofill2() {
   let rpId = $("#rp-id").val();
   let userVerification = $("#userVerification").val();
 
   setEvent('autofill start.');
-  let tmp = await navigator.credentials.get({
+  navigator.credentials.get({
     publicKey: {
       allowCredentials: [],
       rpId: rpId,
@@ -349,9 +349,7 @@ async function autofill2() {
     },
     signal: abortSignal,
     mediation: 'conditional',
-  })
-  /*
-  .then(success => {
+  }).then(success => {
     document.getElementById('get-id').innerText = success.id;
     document.getElementById('get-type').innerText = success.type;
     document.getElementById('get-cbor').innerText = JSON.stringify(parseAuthenticatorData(success.response.authenticatorData));
@@ -367,8 +365,6 @@ async function autofill2() {
     console.log({ error })
     setEvent('autofill error.');
   });
-  */
-  console.log(tmp);
 }
 
 // 検証
