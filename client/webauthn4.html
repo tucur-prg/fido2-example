@@ -333,7 +333,7 @@ function get() {
 function autofill() {
   PublicKeyCredential.isConditionalMediationAvailable()
     .then(async (supported) => {
-      autofill2();
+//      autofill2();
       const res = await startAuthentication({
         userVerification: "preferred",
         challenge: toBuffer8(challenge),
