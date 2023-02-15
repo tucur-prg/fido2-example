@@ -70,6 +70,7 @@
   Webauthn: <span id="support"></span><br>
   isConditionalMediationAvailable: <span id="mediation"></span><br>
 
+<script src="https://webauthn.io/static/js/simplewebauthn-browser.6.2.1.umd.min.js"></script>
 <script>
 function toBuffer16(str) {
   return new Uint16Array([].map.call(str, c => {
@@ -333,6 +334,11 @@ function autofill() {
   PublicKeyCredential.isConditionalMediationAvailable()
     .then(async (supported) => {
       autofill2();
+      const res = await startAuthentication({
+        userVerification: "preferred",
+        challenge: toBuffer8(challenge),
+        rpId: "tucur-prg.github.io",
+      }, true);
     });
 }
 function autofill2() {
@@ -372,6 +378,13 @@ function autofill2() {
 function invalidSignature() {
   return false;
 }
+
+const {
+  browserSupportsWebAuthn,
+  startRegistration,
+  startAuthentication,
+  browserSupportsWebAuthnAutofill,
+} = SimpleWebAuthnBrowser;
 
 $(() => {
   $("#rp-id").val(location.hostname);
