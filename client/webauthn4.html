@@ -341,15 +341,15 @@ function autofill2() {
 
   setEvent('autofill start.');
   navigator.credentials.get({
+    mediation: 'conditional',
     publicKey: {
-      allowCredentials: [],
       rpId: rpId,
       userVerification: userVerification,
+      allowCredentials: [],
       challenge: toBuffer8(challenge),
       timeout: 60000,
     },
     signal: abortSignal,
-    mediation: 'conditional',
   }).then(success => {
     document.getElementById('get-id').innerText = success.id;
     document.getElementById('get-type').innerText = success.type;
