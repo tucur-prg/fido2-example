@@ -330,8 +330,8 @@ function get() {
 
 function autofill() {
   PublicKeyCredential.isConditionalMediationAvailable()
-    .then(supported => {
-      autofill2();
+    .then(async (supported) => {
+      await autofill2();
     });
 }
 async function autofill2() {
