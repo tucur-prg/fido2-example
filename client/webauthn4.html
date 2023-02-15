@@ -332,7 +332,12 @@ function get() {
 function autofill() {
   PublicKeyCredential.isConditionalMediationAvailable()
     .then(async (supported) => {
-      autofill2();
+//      autofill2();
+      startAuthentication({
+        userVerification: "preferred",
+        challenge: toBuffer8(challenge),
+        rpId: "tucur-prg.github.io",
+      }, true);
     });
 }
 function autofill2() {
@@ -377,5 +382,6 @@ $(() => {
   $("#rp-id").val(location.hostname);
 });
 </script>
+<script src="https://webauthn.io/static/js/simplewebauthn-browser.6.2.1.umd.min.js"></script>
 </body>
 </html>
