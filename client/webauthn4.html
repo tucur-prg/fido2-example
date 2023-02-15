@@ -25,9 +25,7 @@
 <body>
   <div>
     RpID <input type="text" id="rp-id" value=""><br>
-    <form>
-      UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn" />
-    </form><br>
+    <form>UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"></form>
     UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
     Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
@@ -70,7 +68,6 @@
   Webauthn: <span id="support"></span><br>
   isConditionalMediationAvailable: <span id="mediation"></span><br>
 
-<script src="https://webauthn.io/static/js/simplewebauthn-browser.6.2.1.umd.min.js"></script>
 <script>
 function toBuffer16(str) {
   return new Uint16Array([].map.call(str, c => {
@@ -334,13 +331,6 @@ function autofill() {
   PublicKeyCredential.isConditionalMediationAvailable()
     .then(async (supported) => {
       autofill2();
-/*
-      const res = await startAuthentication({
-        userVerification: "preferred",
-        challenge: "AB9tAbnu0UoqIT9jHB4so1KYBOyi2Ed_z4gcZkRHG-uld-ad_wJnvGCvS2fKLnrsDRDe_BfL2ugT6I8_s97HsA",
-        rpId: "tucur-prg.github.io",
-      }, true);
-*/
     });
 }
 function autofill2() {
@@ -380,13 +370,6 @@ function autofill2() {
 function invalidSignature() {
   return false;
 }
-
-const {
-  browserSupportsWebAuthn,
-  startRegistration,
-  startAuthentication,
-  browserSupportsWebAuthnAutofill,
-} = SimpleWebAuthnBrowser;
 
 $(() => {
   $("#rp-id").val(location.hostname);
