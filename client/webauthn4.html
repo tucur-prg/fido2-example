@@ -331,7 +331,7 @@ function autofill() {
   let userVerification = $("#userVerification").val();
 
   setEvent('autofill start.');
-  navigator.credentials.get({
+  let op = {
     publicKey: {
       allowCredentials: [],
       rpId: rpId,
@@ -341,7 +341,8 @@ function autofill() {
     },
     signal: abortSignal,
     mediation: 'conditional',
-  }).then(success => {
+  };
+  navigator.credentials.get(op).then(success => {
     document.getElementById('get-id').innerText = success.id;
     document.getElementById('get-type').innerText = success.type;
     document.getElementById('get-cbor').innerText = JSON.stringify(parseAuthenticatorData(success.response.authenticatorData));
