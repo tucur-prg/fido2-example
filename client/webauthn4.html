@@ -25,23 +25,22 @@
 <body>
   <div>
     <form>
-    RpID <input type="text" id="rp-id" value=""><br>
-    UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"><br>
-    UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
-    Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
-    AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
-    <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label><br>
-    <br>
-    CredentialId <input type="text" id="credential-id" size="140">
-    <div>
-      Transports
-      <label>internal <input type="checkbox" id="transportsInternal" value="1" checked></label>
-      <label>hybrid <input type="checkbox" id="transportsHybrid" value="1"></label>
-      <label>usb <input type="checkbox" id="transportsUsb" value="1"></label>
-      <label>ble <input type="checkbox" id="transportsBle" value="1"></label>
-      <label>nfc <input type="checkbox" id="transportsNfc" value="1"></label>
-    </div>
-    <input type="submit" value="送信">
+      RpID <input type="text" id="rp-id" value=""><br>
+      UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"><br>
+      UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
+      Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
+      AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
+      <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label><br>
+      <br>
+      CredentialId <input type="text" id="credential-id" size="140">
+      <div>
+        Transports
+        <label>internal <input type="checkbox" id="transportsInternal" value="1" checked></label>
+        <label>hybrid <input type="checkbox" id="transportsHybrid" value="1"></label>
+        <label>usb <input type="checkbox" id="transportsUsb" value="1"></label>
+        <label>ble <input type="checkbox" id="transportsBle" value="1"></label>
+        <label>nfc <input type="checkbox" id="transportsNfc" value="1"></label>
+      </div>
     </form>
   </div>
   <br>
