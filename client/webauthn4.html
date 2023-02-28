@@ -30,6 +30,7 @@
     Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
     AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
     <label>ResidentKey <input type="checkbox" id="requireResidentKey" value="1" checked></label><br>
+    timeout <input type="text" id="timeout" value="60000"><br>
     <br>
     CredentialId <input type="text" id="credential-id" size="140">
     <div>
@@ -191,6 +192,7 @@ function create() {
   let userVerification = $("#userVerification").val();
   let authenticatorAttachment = $("#authenticatorAttachment").val();
   let requireResidentKey = $("#requireResidentKey").prop("checked");
+  let timeout = $("#timeout").val();
   let excludeCredentials = [];
 
   if (credentialId) {
@@ -213,6 +215,7 @@ function create() {
         displayName: 'DisplayName ' + userId,
       },
       attestation: attestation,
+      timeout: timeout,
       pubKeyCredParams: [
         {
           type: 'public-key',
@@ -246,7 +249,7 @@ function create() {
 
     setEvent('create success.');
   }).catch(error => {
-    document.getElementById('error').innerText = error.message;
+    document.getElementById('error').innerText = error.name + " : " + error.message;
     console.log({ error })
     setEvent('create error.');
   });
@@ -258,6 +261,7 @@ function get() {
   let rpId = $("#rp-id").val();
   let credentialId = $("#credential-id").val();
   let userVerification = $("#userVerification").val();
+  let timeout = $("#timeout").val();
   let transports = [];
   let allowCredentials = [];
 
@@ -307,6 +311,7 @@ function get() {
       rpId: rpId,
       userVerification: userVerification,
       allowCredentials: allowCredentials,
+      timeout: timeout,
       challenge: toBuffer8(challenge),
     },
   }).then(success => {
@@ -321,7 +326,7 @@ function get() {
 
     setEvent('get success.');
   }).catch(error => {
-    document.getElementById('error').innerText = error.message;
+    document.getElementById('error').innerText = error.name + " : " + error.message;
     console.log({ error })
     setEvent('get error.');
   });
@@ -336,6 +341,7 @@ function autofill() {
 function autofill2() {
   let rpId = $("#rp-id").val();
   let userVerification = $("#userVerification").val();
+  let timeout = $("#timeout").val();
 
   setEvent('autofill start.');
   navigator.credentials.get({
@@ -344,8 +350,8 @@ function autofill2() {
       rpId: rpId,
       userVerification: userVerification,
       allowCredentials: [],
+      timeout: timeout,
       challenge: toBuffer8(challenge),
-      timeout: 60000,
     },
     signal: abortSignal,
   }).then(success => {
@@ -360,7 +366,7 @@ function autofill2() {
 
     setEvent('autofill success.');
   }).catch(error => {
-    document.getElementById('error').innerText = error.message;
+    document.getElementById('error').innerText = error.name + " : " + error.message;
     console.log({ error })
     setEvent('autofill error.');
   });
