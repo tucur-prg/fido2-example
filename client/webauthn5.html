@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+     content="width=320,
+        height=480,
+        initial-scale=1.0,
+        minimum-scale=1.0,
+        maximum-scale=2.0,
+        user-scalable=yes" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>WebAuthn</title>
+  <script src="https://unpkg.com/cbor-js-unofficial@0.1.0-a4/cbor.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+  h2 {
+    font-size: 18px;
+    margin: 0;
+  }
+  </style>
+</head>
+
+<body>
+  <div>
+    RpID <input type="text" id="rp-id" value=""><br>
+    <form>UserID <input type="text" id="user-id" name="username" autocomplete="username webauthn"></form>
+    UserVerification <select id="userVerification"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
+    Attestation <select id="attestation"><option>direct</option><option>indirect</option><option>none</option></select><br>
+    AuthenticatorAttachment <select id="authenticatorAttachment"><option>platform</option><option>cross-platform</option></select><br>
+    ResidentKey <select id="residentKey"><option>required</option><option>preferred</option><option>discouraged</option></select><br>
+    timeout <input type="text" id="timeout" value="60000"><br>
+    <br>
+    CredentialId <input type="text" id="credential-id" size="140">
+    <div>
+      Transports
+      <label>internal <input type="checkbox" id="transportsInternal" value="1" checked></label>
+      <label>hybrid <input type="checkbox" id="transportsHybrid" value="1"></label>
+      <label>usb <input type="checkbox" id="transportsUsb" value="1"></label>
+      <label>ble <input type="checkbox" id="transportsBle" value="1"></label>
+      <label>nfc <input type="checkbox" id="transportsNfc" value="1"></label>
+    </div>
+  </div>
+  <br>
+  <button onClick="create();">Create Security Key</button>
+  <button onClick="get();">Get Security Key</button>
+  <button onClick="autofill();">Autofill</button>
+  <hr>
+  <span id="event"></span><br>
+  <hr>
+  <h2>navigator.credentials.create()</h2>
+  <b>ID</b> : <span id="create-id"></span><br>
+  <b>Type</b> : <span id="create-type"></span><br>
+  <b>Transports</b> : <span id="create-transports"></span><br>
+  <b>Attestation</b> : <span id="create-cbor"></span><br>
+  <b>ClientDataJSON</b> : <span id="create-json"></span><br>
+  <hr>
+  <h2>navigator.credentials.get()</h2>
+  <b>ID</b> : <span id="get-id"></span><br>
+  <b>Type</b> : <span id="get-type"></span><br>
+  <b>Authenticator</b> : <span id="get-cbor"></span><br>
+  <b>ClientDataJSON</b> : <span id="get-json"></span><br>
+  <b>Signature</b> : <span id="get-sig"></span><br>
+  <b>UserHandle</b> : <span id="get-uh"></span><br>
+  <hr>
+  <span id="error"></span><br>
+  <hr>
+  Webauthn: <span id="support"></span><br>
+  isConditionalMediationAvailable: <span id="mediation"></span><br>
+
+<script>
+function toBuffer16(str) {
+  return new Uint16Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }));
+}
+function toBuffer8(str) {
+  return new Uint8Array([].map.call(str, c => {
+    return c.charCodeAt(0);
+  }));
+}
+
+function uint16ToString(buf) {
+  return String.fromCharCode.apply("", new Uint16Array(buf));
+}
+function uint8ToString(buf) {
+  return String.fromCharCode.apply("", new Uint8Array(buf));
+}
+
+async function sha256(str) {
+    const buff = new Uint8Array([].map.call(str, (c) => c.charCodeAt(0))).buffer;
+    const digest = await crypto.subtle.digest('SHA-256', buff);
+    return new Uint8Array(digest);
+}
+
+function h(v, spacer='') {
+  return [].map.call(v, x => ("00" + x.toString(16)).slice(-2)).join(spacer)
+}
+
+function b64encode(buf) {
+  str = String.fromCharCode.apply(null, new Uint8Array(buf))
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+function b64decode(val) {
+  val = val
+    .replace(/\-/g, '+')
+    .replace(/\_/g, '/')
+    .padEnd(val.length + (4 - val.length % 4), '=')
+  return atob(val)
+}
+
+const abortController = new AbortController();
+const abortSignal = abortController.signal;
+
+let challenge = "my_challenge.my_challenge";
+let registId = [];
+
+document.getElementById('support').innerText = ('credentials' in navigator) ? 'Support' : 'UnSupport';
+document.getElementById('mediation').innerText = ('isConditionalMediationAvailable' in PublicKeyCredential) ? 'Support' : 'UnSupport';
+if ('isConditionalMediationAvailable' in PublicKeyCredential) {
+  PublicKeyCredential.isConditionalMediationAvailable().then(res => {
+    if (res) {
+      document.getElementById('mediation').innerText = 'Support (true)';
+    } else {
+      document.getElementById('mediation').innerText = 'Support (false)';
+    }
+  })
+}
+
+function setEvent(str) {
+  document.getElementById('event').innerText = "Event: " + str;
+}
+
+function parseAttestationObject(attestationObject) {
+  let attestation = CBOR.decode(attestationObject);
+  let response = {};
+
+  response['fmt'] = attestation.fmt;
+  response['attStmt'] = attestation.attStmt;
+  response['authData.rpIdHash'] = h(attestation.authData.slice(0, 32));
+  response['authData.flags'] = {
+    'data': attestation.authData[32],
+    'UP': Boolean(attestation.authData[32] & 0x01),
+    'UV': Boolean(attestation.authData[32] & 0x04),
+    'BE': Boolean(attestation.authData[32] & 0x08),
+    'BS': Boolean(attestation.authData[32] & 0x10),
+    'AT': Boolean(attestation.authData[32] & 0x40),
+    'ED': Boolean(attestation.authData[32] & 0x80),
+  };
+  response['authData.signCount'] = (attestation.authData[33] << 24) | (attestation.authData[34] << 16) | (attestation.authData[35] << 8) | attestation.authData[36];
+  const aaguid = h(attestation.authData.slice(37, 53));
+  response['authData.aaguid'] = aaguid.slice(0, 8) + '-' + aaguid.slice(8, 12) + '-' + aaguid.slice(12, 16) + '-' + aaguid.slice(16);
+  const credentialIdLength = (attestation.authData[53] << 8) + attestation.authData[54]
+  response['authData.credentialIdLength'] = credentialIdLength;
+  response['authData.credentialId'] = attestation.authData.slice(55, 55 + credentialIdLength);
+  response['authData.publicKeyCbor'] = CBOR.decode(attestation.authData.slice(55 + credentialIdLength).buffer);
+
+  return response;
+}
+
+function parseAuthenticatorData(authenticatorData) {
+  let authenticator = new Uint8Array(authenticatorData);
+  let response = {};
+
+  response['rpIdHash'] = h(authenticator.slice(0, 32));
+  response['flags'] = {
+    'data': authenticator[32],
+    'UP': Boolean(authenticator[32] & 0x01),
+    'UV': Boolean(authenticator[32] & 0x04),
+    'BE': Boolean(authenticator[32] & 0x08),
+    'BS': Boolean(authenticator[32] & 0x10),
+    'AT': Boolean(authenticator[32] & 0x40),
+    'ED': Boolean(authenticator[32] & 0x80),
+  };
+  response['signCount'] = (authenticator[33] << 24) | (authenticator[34] << 16) | (authenticator[35] << 8) | authenticator[36]
+
+  return response;
+}
+
+// Button Event
+function create() {
+  document.getElementById('error').innerText = "";
+
+  let rpId = $("#rp-id").val();
+  let userId = $("#user-id").val();
+  let credentialId = $("#credential-id").val();
+  let attestation = $("#attestation").val();
+  let userVerification = $("#userVerification").val();
+  let authenticatorAttachment = $("#authenticatorAttachment").val();
+  let residentKey = $("#residentKey").val();
+  let timeout = $("#timeout").val();
+  let excludeCredentials = [];
+
+  if (credentialId) {
+    excludeCredentials.push({
+      type: 'public-key',
+      id: toBuffer8(b64decode(credentialId)),
+    });
+  }
+
+  setEvent('create start.');
+  navigator.credentials.create({
+    publicKey: {
+      rp: {
+        id: rpId,
+        name: 'WebAuthn Test',
+      },
+      user: {
+        id: toBuffer8(userId),
+        name: 'Name ' + userId,
+        displayName: 'DisplayName ' + userId,
+      },
+      attestation: attestation,
+      timeout: timeout,
+      pubKeyCredParams: [
+        {
+          type: 'public-key',
+          alg: -7,
+        },
+        {
+          type: 'public-key',
+          alg: -257
+        },
+      ],
+      challenge: toBuffer8(challenge),
+      excludeCredentials: excludeCredentials,
+      authenticatorSelection: {
+        userVerification: userVerification,
+        authenticatorAttachment: authenticatorAttachment,
+        residentKey: residentKey,
+      },
+    },
+  }).then(success => {
+    document.getElementById('create-id').innerText = success.id;
+    document.getElementById('create-type').innerText = success.type;
+    document.getElementById('create-transports').innerText = JSON.stringify(success.response.getTransports());
+    document.getElementById('create-cbor').innerText = JSON.stringify(parseAttestationObject(success.response.attestationObject));
+    document.getElementById('create-json').innerText = uint8ToString(success.response.clientDataJSON);
+
+//    registId.push(success.rawId);
+
+    $("#credential-id").val(success.id);
+
+    console.log({ success });
+
+    setEvent('create success.');
+  }).catch(error => {
+    document.getElementById('error').innerText = error.name + " : " + error.message;
+    console.log({ error })
+    setEvent('create error.');
+  });
+}
+
+function get() {
+  document.getElementById('error').innerText = "";
+
+  let rpId = $("#rp-id").val();
+  let credentialId = $("#credential-id").val();
+  let userVerification = $("#userVerification").val();
+  let timeout = $("#timeout").val();
+  let transports = [];
+  let allowCredentials = [];
+
+  let transportsInternal = $("#transportsInternal").prop("checked");
+  let transportsHybrid = $("#transportsHybrid").prop("checked");
+  let transportsUsb = $("#transportsUsb").prop("checked");
+  let transportsBle = $("#transportsBle").prop("checked");
+  let transportsNfc = $("#transportsNfc").prop("checked");
+
+  if (transportsInternal) {
+    transports.push('internal');
+  }
+  if (transportsHybrid) {
+    transports.push('hybrid');
+  }
+  if (transportsUsb) {
+    transports.push('usb');
+  }
+  if (transportsBle) {
+    transports.push('ble');
+  }
+  if (transportsNfc) {
+    transports.push('nfc');
+  }
+
+  for (const _registId of registId) {
+    allowCredentials.push({
+      transports: transports,
+      type: 'public-key',
+      id: _registId,
+    });
+  }
+
+  if (credentialId) {
+    allowCredentials.push({
+      transports: transports,
+      type: 'public-key',
+      id: toBuffer8(b64decode(credentialId)),
+    });
+  }
+
+  console.log("credentials.get: publicKey.allowCredentials:", allowCredentials);
+
+  setEvent('get start.');
+  navigator.credentials.get({
+    publicKey: {
+      rpId: rpId,
+      userVerification: userVerification,
+      allowCredentials: allowCredentials,
+      timeout: timeout,
+      challenge: toBuffer8(challenge),
+    },
+  }).then(success => {
+    document.getElementById('get-id').innerText = success.id;
+    document.getElementById('get-type').innerText = success.type;
+    document.getElementById('get-cbor').innerText = JSON.stringify(parseAuthenticatorData(success.response.authenticatorData));
+    document.getElementById('get-json').innerText = uint8ToString(success.response.clientDataJSON);
+    document.getElementById('get-sig').innerText = h(new Uint8Array(success.response.signature));
+    document.getElementById('get-uh').innerText = h(new Uint8Array(success.response.userHandle));
+
+    console.log({ success });
+
+    setEvent('get success.');
+  }).catch(error => {
+    document.getElementById('error').innerText = error.name + " : " + error.message;
+    console.log({ error })
+    setEvent('get error.');
+  });
+}
+
+function autofill() {
+  PublicKeyCredential.isConditionalMediationAvailable()
+    .then(async (supported) => {
+      autofill2();
+    });
+}
+function autofill2() {
+  let rpId = $("#rp-id").val();
+  let userVerification = $("#userVerification").val();
+  let timeout = $("#timeout").val();
+
+  setEvent('autofill start.');
+  navigator.credentials.get({
+    mediation: 'conditional',
+    publicKey: {
+      rpId: rpId,
+      userVerification: userVerification,
+      allowCredentials: [],
+      timeout: timeout,
+      challenge: toBuffer8(challenge),
+    },
+    signal: abortSignal,
+  }).then(success => {
+    document.getElementById('get-id').innerText = success.id;
+    document.getElementById('get-type').innerText = success.type;
+    document.getElementById('get-cbor').innerText = JSON.stringify(parseAuthenticatorData(success.response.authenticatorData));
+    document.getElementById('get-json').innerText = uint8ToString(success.response.clientDataJSON);
+    document.getElementById('get-sig').innerText = h(new Uint8Array(success.response.signature));
+    document.getElementById('get-uh').innerText = h(new Uint8Array(success.response.userHandle));
+
+    console.log({ success });
+
+    setEvent('autofill success.');
+  }).catch(error => {
+    document.getElementById('error').innerText = error.name + " : " + error.message;
+    console.log({ error })
+    setEvent('autofill error.');
+  });
+}
+
+// 検証
+function invalidSignature() {
+  return false;
+}
+
+$(() => {
+  $("#rp-id").val(location.hostname);
+});
+</script>
+</body>
+</html>
