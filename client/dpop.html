@@ -202,6 +202,20 @@ function parseAuthenticatorData(authenticatorData) {
   return response;
 }
 
+function makeid(length: number) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.,';
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
+let _jwk;
+
 // Button Event
 function create() {
   document.getElementById('error').innerText = "";
@@ -257,12 +271,13 @@ function create() {
     },
   }).then(success => {
     let attestationObject = parseAttestationObject(success.response.attestationObject);
+    _jwk = jwk(attestationObject['authData.publicKeyCbor']);
     document.getElementById('create-id').innerText = success.id;
     document.getElementById('create-type').innerText = success.type;
     document.getElementById('create-transports').innerText = JSON.stringify(success.response.getTransports());
     document.getElementById('create-cbor').innerText = JSON.stringify(attestationObject);
     document.getElementById('create-json').innerText = uint8ToString(success.response.clientDataJSON);
-    document.getElementById('create-jwk').innerText = JSON.stringify(jwk(attestationObject['authData.publicKeyCbor']))
+    document.getElementById('create-jwk').innerText = JSON.stringify(_jwk);
 
 //    registId.push(success.rawId);
 
@@ -330,6 +345,26 @@ function get() {
 
   console.log("credentials.get: publicKey.allowCredentials:", allowCredentials);
 
+  const header = {
+    "typ": "dpop+jwt",
+    "alg": "ES256",
+    "jwk": _jwk,
+  };
+
+  const now = Date.now() / 1000;
+  const payload = {
+    "jti": makeid(16),
+    "htm": method,
+    "htu": endpoint,
+    "iat": now
+  };
+
+  const headerStr = b64encode(JSON.stringify(header));
+  const payloadStr = b64encode(JSON.stringify(payload));
+  const message = headerStr + '.' + payloadStr;
+
+  console.log("jwt", message, header, payload);
+
   setEvent('get start.');
   navigator.credentials.get({
     publicKey: {
@@ -337,7 +372,7 @@ function get() {
       userVerification: userVerification,
       allowCredentials: allowCredentials,
       timeout: timeout,
-      challenge: toBuffer8(challenge),
+      challenge: toBuffer8(message),
     },
   }).then(success => {
     document.getElementById('get-id').innerText = success.id;
